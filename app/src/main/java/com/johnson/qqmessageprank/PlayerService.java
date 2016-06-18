@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.johnson.qqmessageprank.Utils.Const;
 
@@ -12,20 +13,11 @@ public class PlayerService extends Service {
 
     //play music
     private MediaPlayer mediaPlayer;
-    private MonitorReceiver receiver;
+
 
     public PlayerService() {
     }
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wenson);
-        mediaPlayer.setLooping(true);
-        registerWakeUpReceiver();//注册传唤来的 广播 重启 此 服务
-        registerHomeKeyReceiver();
-
-    }
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -35,9 +27,15 @@ public class PlayerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (mediaPlayer.isPlaying()) {//如果monitor服务被先干了
-            mediaPlayer.reset();
+        Log.i("TAG","PLAYSEVICE START");
+        if (mediaPlayer!=null) {//如果monitor服务被先干了
+            mediaPlayer.release();
+            mediaPlayer=null;
         }
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wenson);
+        mediaPlayer.setLooping(true);
+        registerHomeKeyReceiver();
+
         mediaPlayer.start();
 
         return START_STICKY;
@@ -46,24 +44,22 @@ public class PlayerService extends Service {
 
     @Override
     public void onDestroy() {
-        //send wakeup  broadcast
+
         mediaPlayer.stop();
         mediaPlayer.release();
-        Intent intent = new Intent();//发送 监听 广播 唤醒 监听服务
-        intent.setAction(Const.Monitor_RECEIVER_ACTION);
-        sendBroadcast(intent);
+        monitor();
+        Log.i("TAG", " player KILLED BY OS");
         super.onDestroy();
     }
 
+    private void monitor(){
 
-    private void registerWakeUpReceiver() {
-
-        receiver = new MonitorReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Const.WAKEUP_RECEIVER_ACTION);
-        registerReceiver(receiver, filter);
-
+        Log.i("TAG", " PLAYER UP  WAKE MONITOR");
+        Intent monitor = new Intent(this,MonitorService.class);
+        monitor.setAction(Const.MONITOR_SERVICE_ACTION);
+        startService(monitor);
     }
+
 
     private HomeWatcherReceiver mHomeKeyReceiver = null;
 

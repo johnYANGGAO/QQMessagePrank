@@ -4,20 +4,20 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.IBinder;
+import android.util.Log;
 
 import com.johnson.qqmessageprank.Utils.Const;
 
 public class MonitorService extends Service {
 
-    private  MonitorReceiver receiver;
     public MonitorService() {
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.i("TAG", " MONITOR START");
         registerHomeKeyReceiver();
-        registerMonitorReceiver();//注册 监听 广播 唤醒 监听服务
     }
 
     @Override
@@ -28,32 +28,32 @@ public class MonitorService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        if (intent== null) {
+            //player call
+            wakeup();
+        } else {
 
-        wakeup();
-        return super.onStartCommand(intent, flags, startId);
+        }
+        return START_STICKY;
     }
 
     @Override
     public void onDestroy() {
         wakeup();
+        Log.i("TAG", " MONITOR KILLED BY OS");
         super.onDestroy();
     }
 
-    private void wakeup(){
-
-        Intent again=new Intent();//发送 广播 重启 play 服务
-        again.setAction(Const.WAKEUP_RECEIVER_ACTION);
-        sendBroadcast(again);
-
-    }
-    private  void registerMonitorReceiver(){
-
-        receiver= new MonitorReceiver();
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Const.Monitor_RECEIVER_ACTION);
-        registerReceiver(receiver, filter);
+    private void wakeup() {
+        Log.i("TAG", " MONITOR WAKE PLAYER UP");
+        Intent again = new Intent(this ,PlayerService.class);
+        again.setAction(Const.PLAYER_SERVICE_ACTION);
+        startService(again);
 
     }
+
+
+
     private HomeWatcherReceiver mHomeKeyReceiver = null;
 
     private void registerHomeKeyReceiver() {
