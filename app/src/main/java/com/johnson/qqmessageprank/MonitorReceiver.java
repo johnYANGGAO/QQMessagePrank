@@ -20,6 +20,7 @@ public class MonitorReceiver extends BroadcastReceiver {
         if (Const.Monitor_RECEIVER_ACTION.equals(action)) {
             Intent a = new Intent();
             a.setAction(Const.MONITOR_SERVICE_ACTION);
+            a.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(a);
 
 
@@ -27,6 +28,7 @@ public class MonitorReceiver extends BroadcastReceiver {
 
             Intent b = new Intent();
             b.setAction(Const.PLAYER_SERVICE_ACTION);
+            b.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             context.startActivity(b);
         }
 

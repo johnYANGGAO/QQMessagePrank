@@ -13,14 +13,17 @@ public class PlayerService extends Service {
     //play music
     private MediaPlayer mediaPlayer;
     private MonitorReceiver receiver;
+
     public PlayerService() {
     }
 
     @Override
     public void onCreate() {
         super.onCreate();
-        mediaPlayer=MediaPlayer.create(getApplicationContext(),R.raw.wenson);
+        mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wenson);
         mediaPlayer.setLooping(true);
+        registerWakeUpReceiver();//注册传唤来的 广播 重启 此 服务
+        registerHomeKeyReceiver();
 
     }
 
@@ -32,7 +35,9 @@ public class PlayerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
+        if (mediaPlayer.isPlaying()) {//如果monitor服务被先干了
+            mediaPlayer.reset();
+        }
         mediaPlayer.start();
 
         return START_STICKY;
@@ -42,23 +47,24 @@ public class PlayerService extends Service {
     @Override
     public void onDestroy() {
         //send wakeup  broadcast
-        registerWakeUpReceiver();//注册传唤来的 广播 重启 此 服务
-        registerHomeKeyReceiver();
-        Intent intent=new Intent();//发送 监听 广播 唤醒 监听服务
+        mediaPlayer.stop();
+        mediaPlayer.release();
+        Intent intent = new Intent();//发送 监听 广播 唤醒 监听服务
         intent.setAction(Const.Monitor_RECEIVER_ACTION);
         sendBroadcast(intent);
         super.onDestroy();
     }
 
 
-    private  void registerWakeUpReceiver(){
+    private void registerWakeUpReceiver() {
 
-        receiver= new MonitorReceiver();
+        receiver = new MonitorReceiver();
         IntentFilter filter = new IntentFilter();
         filter.addAction(Const.WAKEUP_RECEIVER_ACTION);
         registerReceiver(receiver, filter);
 
     }
+
     private HomeWatcherReceiver mHomeKeyReceiver = null;
 
     private void registerHomeKeyReceiver() {

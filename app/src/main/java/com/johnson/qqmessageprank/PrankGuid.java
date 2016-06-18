@@ -28,9 +28,6 @@ public class PrankGuid extends AppCompatActivity {
         intentplay.setAction(Const.PLAYER_SERVICE_ACTION);
         startService(intentplay);
 
-        Intent intentmonitor = new Intent(this, MonitorService.class);
-        intentmonitor.setAction(Const.MONITOR_SERVICE_ACTION);
-        startService(intentmonitor);
 
     }
 
