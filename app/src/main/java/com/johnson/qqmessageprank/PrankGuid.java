@@ -24,17 +24,21 @@ public class PrankGuid extends AppCompatActivity {
         int maxvolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
         audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxvolume, AudioManager.FLAG_PLAY_SOUND);
         registerHomeKeyReceiver(this);
+
         Intent intentplay = new Intent(this, PlayerService.class);
-        intentplay.setAction(Const.PLAYER_SERVICE_ACTION);
+        intentplay.putExtra("play",Const.PLAYER_SERVICE_ACTION);
         startService(intentplay);
 
+        Intent intentMoniter = new Intent(this, MonitorService.class);
+        intentMoniter.putExtra("monitor",Const.MONITOR_SERVICE_ACTION);
+        startService(intentMoniter);
 
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        unregisterHomeKeyReceiver(this);
+        unregisterHomeKeyReceiver(this);
     }
 
     @Override
