@@ -5,28 +5,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.media.AudioManager;
 import android.util.Log;
+import android.view.KeyEvent;
 
-public class HomeWatcherReceiver extends BroadcastReceiver {
-    public HomeWatcherReceiver() {
+public class HeadPhoneReceiver extends BroadcastReceiver {
+    public HeadPhoneReceiver() {
     }
-    private static final String LOG_TAG = "HomeReceiver";
-    private static final String SYSTEM_DIALOG_REASON_KEY = "reason";
     private AudioManager audioManager;
     @Override
     public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        Log.i(LOG_TAG, "onReceive: action: " + action);
+        // 获得Action
+        String intentAction = intent.getAction();
+        // 获得KeyEvent对象
+        KeyEvent keyEvent = intent.getParcelableExtra(Intent.EXTRA_KEY_EVENT);
 
-            // android.intent.action.CLOSE_SYSTEM_DIALOGS
+        Log.i("TAG", "你好 Action ---->" + intentAction + "  事件是KeyEvent----->" + keyEvent.toString());
+
+        if (Intent.ACTION_MEDIA_BUTTON.equals(intentAction)) {
+
             audioManager = (AudioManager) context.getSystemService(Context.AUDIO_SERVICE);
             int maxvolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
             audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, maxvolume, AudioManager.FLAG_PLAY_SOUND);
-            Intent i = new Intent(context, PrankGuid.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(i);
-
-
+        }
     }
-
 }
-

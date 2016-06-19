@@ -1,10 +1,14 @@
 package com.johnson.qqmessageprank;
 
 import android.app.Service;
+import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.johnson.qqmessageprank.Utils.Const;
@@ -13,7 +17,7 @@ public class PlayerService extends Service {
 
     //play music
     private MediaPlayer mediaPlayer;
-
+    private AudioManager manager;
 
     public PlayerService() {
     }
@@ -28,10 +32,21 @@ public class PlayerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.i("TAG","PLAYSEVICE START");
-        if (mediaPlayer!=null) {//如果monitor服务被先干了
+        if (mediaPlayer!=null) {//如果monitor服务被先干掉了
             mediaPlayer.release();
             mediaPlayer=null;
         }
+        ComponentName cn = new ComponentName(getPackageName(),HeadPhoneReceiver.class.getName());
+        //在模拟上检测不到这个效果。
+
+        if(manager!=null){
+
+            manager.unregisterMediaButtonEventReceiver(cn);
+            manager=null;
+        }
+        manager=(AudioManager) getSystemService(Context.AUDIO_SERVICE);
+        manager.registerMediaButtonEventReceiver(cn);
+
         mediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.wenson);
         mediaPlayer.setLooping(true);
         registerHomeKeyReceiver();
@@ -70,4 +85,6 @@ public class PlayerService extends Service {
 
         registerReceiver(mHomeKeyReceiver, homeFilter);
     }
+
+
 }

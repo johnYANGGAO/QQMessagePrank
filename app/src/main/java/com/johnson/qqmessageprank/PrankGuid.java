@@ -1,5 +1,8 @@
 package com.johnson.qqmessageprank;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -8,13 +11,16 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.KeyEvent;
 
+import com.johnson.qqmessageprank.Utils.AlerReceiver;
+import com.johnson.qqmessageprank.Utils.AlertHelper;
 import com.johnson.qqmessageprank.Utils.Const;
 import com.johnson.qqmessageprank.Utils.ScreenSaver;
 
 public class PrankGuid extends AppCompatActivity {
     //volume controller
     private AudioManager audioManager;
-
+    private AlarmManager alarmMgr;
+    private PendingIntent alarmIntent;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -30,15 +36,20 @@ public class PrankGuid extends AppCompatActivity {
         startService(intentplay);
 
         Intent intentMoniter = new Intent(this, MonitorService.class);
-        intentMoniter.putExtra("monitor",Const.MONITOR_SERVICE_ACTION);
+        intentMoniter.putExtra("monitor", Const.MONITOR_SERVICE_ACTION);
         startService(intentMoniter);
+        alarmMgr = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        Intent intent = new Intent(this, AlerReceiver.class);
+        alarmIntent = PendingIntent.getBroadcast(this, 0, intent, 0);
 
+        AlertHelper.startAlert(alarmMgr,alarmIntent,this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         unregisterHomeKeyReceiver(this);
+
     }
 
     @Override
